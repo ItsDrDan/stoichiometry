@@ -288,7 +288,7 @@ const eqs=[
 const reactionContexts={
  'Water synthesis':{type:'Combination',story:'Hydrogen gas reacts with oxygen gas in a synthesis reaction.'},
  'Ammonia synthesis':{type:'Combination',story:'Nitrogen gas reacts with hydrogen gas to make ammonia.'},
- 'Methane combustion':{type:'Combustion',story:'Methane burns in an excess supply of oxygen.'},
+ 'Methane combustion':{type:'Combustion',story:'Methane burns in oxygen.'},
  'Magnesium oxide':{type:'Combination',story:'A strip of magnesium burns in oxygen.'},
  'Carbonate decomposition':{type:'Decomposition',story:'Solid calcium carbonate is heated until it decomposes.'},
  'Acid neutralization':{type:'Neutralization',story:'Aqueous hydrochloric acid reacts with sodium hydroxide solution.'},
@@ -301,14 +301,14 @@ const reactionContexts={
  'Sodium chloride synthesis':{type:'Combination',story:'Sodium metal reacts with chlorine gas to make table salt.'},
  'Rusting iron':{type:'Combination',story:'Iron metal reacts with oxygen gas to form iron(III) oxide (rust).'},
  'Aluminum chloride':{type:'Combination',story:'Aluminum metal reacts with chlorine gas to form aluminum chloride.'},
- 'Propane combustion':{type:'Combustion',story:'Propane (C₃H₈) burns in an excess supply of oxygen.'}
+ 'Propane combustion':{type:'Combustion',story:'Propane (C₃H₈) burns in oxygen.'}
 };
 const recipeHints={Combination:'A + B → AB',Decomposition:'AB → A + B',Combustion:'Fuel + O₂ → CO₂ + H₂O',Neutralization:'Acid + base → salt + H₂O','Double displacement':'AB + CD → AD + CB','Single displacement':'A + BC → AC + B'};
 const byId=id=>document.getElementById(id),pick=a=>a[Math.floor(Math.random()*a.length)],roll=(a,b)=>a+Math.random()*(b-a);
 function mm(f){const a=formulas[f];if(!a)throw Error('No formula for '+f);const dp=Math.min(...Object.keys(a).map(e=>(masses[e].split('.')[1]||'').length));const value=Object.entries(a).reduce((s,[e,n])=>s+Number(masses[e])*n,0);return Number(value.toFixed(dp));}
 function mmText(f){const dp=Math.min(...Object.keys(formulas[f]).map(e=>(masses[e].split('.')[1]||'').length));return mm(f).toFixed(dp);}
-function normalizeScientific(raw){return String(raw).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]/g,c=>({'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁻':'-','⁺':'+'})[c]);}
-function sfCount(s){let t=normalizeScientific(s).trim().replace(/,/g,'').replace(/\s/g,'').replace(/(?:[×x*]10\^?|[eE])[+-]?\d+$/,'').replace(/^[+-]/,'');if(!/^\d*\.?\d+$/.test(t))return 0;t=t.replace(/^0+(?=\d)/,'');if(t.includes('.'))return t.replace('.','').replace(/^0+/,'').length;return t.replace(/0+$/,'').length;}
+function normalizeScientific(raw){return String(raw).replace(/[−–]/g,'-').replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]/g,c=>({'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁻':'-','⁺':'+'})[c]);}
+function sfCount(s){let t=normalizeScientific(s).trim().replace(/,/g,'').replace(/\s/g,'').replace(/(?:[×xX*]10\^?|[eE])[+-]?\d+$/,'').replace(/^[+-]/,'');if(!/^(?:\d+\.?\d*|\.\d+)$/.test(t))return 0;t=t.replace(/^0+(?=\d)/,'');if(t.includes('.'))return t.replace('.','').replace(/^0+/,'').length;return t.replace(/0+$/,'').length;}
 function fmt(x,s=3){if(x===0)return '0';const rounded=Number(x.toPrecision(s)),exp=Math.floor(Math.log10(Math.abs(rounded)));const fixed=rounded.toFixed(Math.max(0,s-1-exp));if(exp>=5||exp<=-3||exp>=s||(!fixed.includes('.')&&fixed.endsWith('0'))){const e=rounded.toExponential(s-1);const [mantissa,power]=e.split('e');return mantissa+' × 10'+String(Number(power)).replace(/[0-9-]/g,c=>({'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'})[c]);}return fixed;}
 function parseValue(raw){let t=normalizeScientific(raw).trim().replace(/,/g,'').replace(/\s+/g,'').replace(/[×x*]10\^?([+-]?\d+)$/i,'e$1');if(!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(t))return NaN;return Number(t);}
 function fhtml(f){return '<span class="formula">'+f.replace(/(\d+)/g,'<sub>$1</sub>')+'</span>';}
@@ -551,7 +551,7 @@ function makeRatioPick(){
  const opt=(key,top,bot)=>({key,html:frac(top,bot)});
  const right=opt('right',cT+' mol '+fhtml(to),cF+' mol '+fhtml(from));
  const pool=[opt('flipped',cF+' mol '+fhtml(from),cT+' mol '+fhtml(to))];
- if(cF!==1||cT!==1)pool.push(opt('ones','1 mol '+fhtml(to),'1 mol '+fhtml(from)));
+ if(cF!==cT)pool.push(opt('ones','1 mol '+fhtml(to),'1 mol '+fhtml(from)));
  if(others.length){const o=pick(others);pool.push(opt('other',coeff(e,o)+' mol '+fhtml(o),cF+' mol '+fhtml(from)));}
  pool.push(opt('grams',cT+' g '+fhtml(to),cF+' g '+fhtml(from)));
  const seen=new Set([right.html]),opts=[right];for(const o of shuffle(pool)){if(!seen.has(o.html)&&opts.length<4){seen.add(o.html);opts.push(o)}}
@@ -898,6 +898,7 @@ function checkAnswer(){const q=state.q;if(q.reactionTask&&!q.reactionTask.solved
  const target=Number(q.answer.toPrecision(q.sf)),tol=Math.max(Math.abs(target)*.005,Math.abs(q.answer)*1e-9);
  if(Math.abs(n-target)>tol){markWrong(q);const alt=(q.alts||[]).find(a=>Math.abs(n-a.v)<=Math.abs(a.v)*.012);setFeedback('bad',(alt?alt.msg:'Check the mole ratio, units, and arithmetic.')+(state.guideOn||!q.guide?.length?' Try a hint if you are stuck.':(state.view==='learn'?' Tip: tap <b>Try with help</b> above to go one step at a time.':' Tip: turn on <b>Step-by-step help</b> to check each step.')));return}
  if(sfCount(raw)!==q.sf){setFeedback('info','<b>Your math is right!</b> Now round to '+q.sf+' significant figures: '+escape(fmt(q.answer,q.sf))+'. Enter it that way to score.');return}
+ {const step=Math.pow(10,Math.floor(Math.log10(Math.abs(target)))-q.sf+1);if(Math.abs(n-target)>step*1.001){markWrong(q);setFeedback('bad','Very close, but your last digits don’t match. Recheck your arithmetic and rounding, and avoid rounding in the middle steps.');return}}
  setFeedback('good','Correct! '+escape(fmt(q.answer,q.sf))+' '+unitHTML(q.unit)+'.'+scoreCorrect(q));}
 function checkChoice(key){const q=state.q;if(q.challenge){checkChallengeAnswer(q,key);return}countAttempt(q);
  byId('choiceBox').querySelectorAll('[data-choice]').forEach(b=>{if(b.dataset.choice===key)b.classList.add(key===q.answer?'right':'wrong')});
@@ -929,7 +930,7 @@ function advanceChallenge(q){const c=q.challenge,stage=c.stages[c.index];c.compl
 function checkChallengeAnswer(q,choiceKey){const stage=q.challenge.stages[q.challenge.index];const raw=stage.choice?choiceKey:byId('answer').value.trim();if(!raw){setFeedback('info',stage.choice?'Choose a reactant first.':'Enter an answer first.');return}
  countAttempt(q);
  if(stage.choice){if(raw!==stage.answer){setFeedback('bad','Compare the two possible product amounts. The smaller amount identifies the limiting reactant.');markWrong(q);return}}
- else{const n=parseValue(raw);if(!Number.isFinite(n)){setFeedback('info','Enter a number such as 2.70E23 or 2.70 *10^23.');return}const target=Number(stage.answer.toPrecision(stage.sf)),tol=Math.max(Math.abs(target)*.005,Math.abs(stage.answer)*1e-9);if(Math.abs(n-target)>tol){setFeedback('bad','Check the mole ratio, units, and arithmetic. Try a hint.');markWrong(q);return}if(sfCount(raw)!==stage.sf){setFeedback('info','<b>Your math is right!</b> Use '+stage.sf+' significant figures: '+escape(fmt(stage.answer,stage.sf))+'.');return}}
+ else{const n=parseValue(raw);if(!Number.isFinite(n)){setFeedback('info','Enter a number such as 2.70E23 or 2.70 *10^23.');return}const target=Number(stage.answer.toPrecision(stage.sf)),tol=Math.max(Math.abs(target)*.005,Math.abs(stage.answer)*1e-9);if(Math.abs(n-target)>tol){setFeedback('bad','Check the mole ratio, units, and arithmetic. Try a hint.');markWrong(q);return}if(sfCount(raw)!==stage.sf){setFeedback('info','<b>Your math is right!</b> Use '+stage.sf+' significant figures: '+escape(fmt(stage.answer,stage.sf))+'.');return}{const step=Math.pow(10,Math.floor(Math.log10(Math.abs(target)))-stage.sf+1);if(Math.abs(n-target)>step*1.001){setFeedback('bad','Very close, but your last digits don’t match. Recheck your arithmetic and rounding.');markWrong(q);return}}}
  advanceChallenge(q);}
 
 /* ================= CHEM 1A reaction part 1 ================= */
