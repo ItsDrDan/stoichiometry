@@ -160,7 +160,7 @@ dialog{border:0;border-radius:18px;box-shadow:0 24px 80px #14173855;padding:0;wi
 .g-ask,.ex-ask{font-size:1.1rem}.g-title,.ex-title{font-size:.98rem!important}.work,.g-work,.g-setup{font-size:1.15rem!important}.idea{font-size:1.06rem!important}.coach{font-size:1.12rem!important}
 /* illustrations */
 .ex-steps,.guide-steps{grid-template-columns:minmax(0,1fr)}.ex-steps li,.guide-steps li{min-width:0}
-.vmap{display:flex;flex-direction:column;align-items:center;gap:4px}.vm-node{background:#f3f4f9;border:1.5px solid #d7dbea;border-radius:12px;padding:8px 16px;font-weight:700;font-size:1.05rem;color:#8a93ab;min-width:200px;text-align:center}.vm-node.on{background:#fff;border-color:#4b57d1;color:var(--ink)}.vm-node.start{background:#eef0fe;border-color:#4b57d1;color:var(--ink)}
+.vmap{display:flex;flex-direction:column;align-items:center;gap:4px}.vm-node{background:#f3f4f9;border:1.5px solid #d7dbea;border-radius:12px;padding:8px 16px;font-weight:700;font-size:1.05rem;color:#636e8a;min-width:200px;text-align:center}.vm-node.on{background:#fff;border-color:#4b57d1;color:var(--ink)}.vm-node.start{background:#eef0fe;border-color:#4b57d1;color:var(--ink)}
 .vm-arrow{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.95rem;color:#8b93c9;padding:2px 0}.vm-arrow::before{content:'↓';font-size:1.3rem}.vm-arrow.now{color:#4b57d1}.vm-arrow.done{color:#2f8a64}.vm-b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#aab2ea;color:#fff;font-size:.82rem}.vm-arrow.now .vm-b{background:#4b57d1}.vm-arrow.done .vm-b{background:#3a9a71}
 .art{margin-top:12px;border:1px solid #dfe3f6;border-radius:var(--r-md);background:linear-gradient(135deg,#fbfcff,#f6f3ff);padding:14px 16px}
 .art-title{font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
@@ -198,6 +198,8 @@ dialog{border:0;border-radius:18px;box-shadow:0 24px 80px #14173855;padding:0;wi
 <link rel="stylesheet" href="https://itsdrdan.github.io/games/brand/itsdrdan.css">
 <script src="https://itsdrdan.github.io/games/brand/icons.js" defer></script>
 <script src="https://itsdrdan.github.io/games/brand/embed.js" defer></script>
+<style>/* sweep 2026-11-05: keep the top bar inside a 375px phone screen */@media(max-width:400px){.tb{gap:5px;padding:0 8px}.seg button{padding:6px 8px}.tb-streak{padding:5px 7px}.tb-btn{padding:6px 9px}.tb-brand img{width:34px;height:34px}}</style>
+<style>/* sweep 2026-11-05: top bar fits tablet and Canvas widths */@media(max-width:800px){.tb-brand span,.tb-btn span{display:none}}</style>
 </head>
 <body><canvas id="celebrationCanvas" aria-hidden="true" hidden></canvas><div class="toasts" id="toasts" aria-live="polite"></div>
 <header class="topbar"><div class="tb">
@@ -831,7 +833,7 @@ function renderExample(){const q=state.ex,l=levelById(state.level),n=q.guide.len
  byId('exampleBox').innerHTML='<span class="ex-label">Worked example · watch first, then try one</span><div class="idea"><span aria-hidden="true">💡</span><div>'+l.idea+'</div></div><div class="question"><div class="equation">'+exEquation(q)+'</div><p class="prompt">'+q.prompt+'</p></div>'+illustrationHTML(q,state.exStep)+
  '<ol class="ex-steps">'+shown.map((s,k)=>'<li><div class="ex-title">Step '+(k+1)+' of '+n+' · '+escape(s.title)+'</div><div class="ex-ask">'+s.ask+'</div><div class="work">'+s.explain+'</div></li>').join('')+'</ol>'+
  (state.exStep>=n?'<div class="ex-answer">✅ '+finalText(q)+'</div>':'')+
- '<div class="ex-actions">'+(state.exStep<n?'<button type="button" class="btn primary big-next" data-ex="next">Show the next step ▶ <small style="opacity:.8;font-weight:600">('+(state.exStep+1)+' of '+n+')</small></button>':'<button type="button" class="btn primary big-next" data-ex="try">✏️ My turn →</button>')+'<button type="button" class="link-btn" data-ex="another">🔁 Another example</button>'+(state.exStep<n?'<button type="button" class="link-btn" data-ex="all">Show all steps</button>':'')+'</div>';updateCoach();}
+ '<div class="ex-actions">'+(state.exStep<n?'<button type="button" class="btn primary big-next" data-ex="next">Show the next step ▶ <small style="opacity:.95;font-weight:600">('+(state.exStep+1)+' of '+n+')</small></button>':'<button type="button" class="btn primary big-next" data-ex="try">✏️ My turn →</button>')+'<button type="button" class="link-btn" data-ex="another">🔁 Another example</button>'+(state.exStep<n?'<button type="button" class="link-btn" data-ex="all">Show all steps</button>':'')+'</div>';updateCoach();}
 function exAction(a){if(a==='next')state.exStep++;else if(a==='all')state.exStep=state.ex.guide.length;else if(a==='another'){newExample();ensurePlayVisible();return}else if(a==='try'){state.learnPhase='try';state.guideOn=true;newQuestion();ensurePlayVisible();return}renderExample();
  if(a==='next'){const nx=byId('exampleBox').querySelector('[data-ex="next"]'),tgt=nx?byId('exampleBox').querySelector('.ex-actions'):byId('exampleBox').querySelector('.ex-answer');tgt?.scrollIntoView({block:'nearest',behavior:reduceMotion()?'auto':'smooth'});(nx||byId('exampleBox').querySelector('[data-ex="try"]'))?.focus({preventScroll:true});}}
 
