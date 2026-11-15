@@ -196,7 +196,7 @@ dialog{border:0;border-radius:18px;box-shadow:0 24px 80px #14173855;padding:0;wi
 </style><script src="https://itsdrdan.github.io/games/track.js" defer></script>
 
 <link rel="stylesheet" href="https://itsdrdan.github.io/games/brand/itsdrdan.css">
-<script src="https://itsdrdan.github.io/games/brand/chemparse.v1.js"></script><!-- shared number reading (never edited; a change is a new version) -->
+<script src="https://itsdrdan.github.io/games/brand/chemparse.v2.js"></script><!-- shared number reading (never edited; a change is a new version) -->
 <script src="https://itsdrdan.github.io/games/brand/icons.js" defer></script>
 <script src="https://itsdrdan.github.io/games/brand/embed.js" defer></script>
 <style>/* sweep 2026-11-05: keep the top bar inside a 375px phone screen */@media(max-width:400px){.tb{gap:5px;padding:0 8px}.seg button{padding:6px 8px}.tb-streak{padding:5px 7px}.tb-btn{padding:6px 9px}.tb-brand img{width:34px;height:34px}}</style>
@@ -341,7 +341,8 @@ function normalizeScientific(raw){return String(raw).replace(/[−–]/g,'-').re
 /* Shared number reading: games/brand/chemparse.v1.js (loaded in <head>). If it did not load, say so instead of marking answers wrong. */
 const CP=window.ChemParse||null;if(!CP)document.addEventListener('DOMContentLoaded',()=>{const b=document.createElement('div');b.setAttribute('role','alert');b.style.cssText='position:sticky;top:0;z-index:999;background:#fff3cd;border-bottom:2px solid #e0a800;padding:12px 16px;font-weight:700;text-align:center';b.textContent='Part of this game did not load, so answers cannot be checked. Please reload the page.';document.body.prepend(b);});
 function sfCount(s){return CP.sfCount(s);}
-function fmt(x,s=3){if(x===0)return '0';const rounded=Number(x.toPrecision(s)),exp=Math.floor(Math.log10(Math.abs(rounded)));const fixed=rounded.toFixed(Math.max(0,s-1-exp));if(exp===s-1&&exp>=1&&exp<=4&&!fixed.includes('.')&&fixed.endsWith('0'))return fixed+'.'; /* 380 to 3 sig figs shows as "380." instead of 3.80 × 10² */if(exp>=5||exp<=-3||exp>=s||(!fixed.includes('.')&&fixed.endsWith('0'))){const e=rounded.toExponential(s-1);const [mantissa,power]=e.split('e');return mantissa+' × 10'+String(Number(power)).replace(/[0-9-]/g,c=>({'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'})[c]);}return fixed;}
+/* Dr. Dan's rule (2026-11-14): a regular number whenever it can show the sig figs (0.0472, 380., 1230); scientific notation when it cannot (6000 to 2 sf is 6.0 × 10³) or the number is very large or very small. Shared: chemparse.v2.js */
+function fmt(x,s=3){return CP.fmt(x,s);}
 /* a comma that is not a thousands separator (2,5) is a decimal comma: not a number here */
 const decimalComma=raw=>CP.decimalComma(raw);
 function parseValue(raw){return CP.parseValue(raw);}
